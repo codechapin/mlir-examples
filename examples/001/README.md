@@ -4,16 +4,19 @@ with Clang:
 * `001-simple-return-0.c`
 * `001-simple-return-0.mlir`
 
+The python file will create similar MLIR as the above mlir file, but using the Python bindings.
+
 A simplified MLIR workflow:
 
 ## First pass
 Lower the MLIR to LLVM Dialect:
 
 ```shell
- mlir-opt 001-simple-return-0.mlir \
-  --convert-func-to-llvm \
+ mlir-opt --convert-func-to-llvm \
   --convert-arith-to-llvm \
   --reconcile-unrealized-casts \
+  --triple=arm64-apple-macosx15.0.0 \
+  001-simple-return-0.mlir \
   -o 001-simple-return-1.mlir
 ```
 
@@ -30,7 +33,7 @@ It will print the result from calling the `@main` Function
 Lower the MLIR to LLVM IR
 
 ```shell
-mlir-translate 001-simple-return-1.mlir -mlir-to-llvmir -o 001-simple-return-2.ll
+mlir-translate -mlir-to-llvmir 001-simple-return-1.mlir -o 001-simple-return-2.ll
 ```
 The lowered is now in `001-simple-return-2.ll` as LLVM IR.
 

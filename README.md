@@ -1,10 +1,15 @@
 # MLIR Examples
 
-This repository contains MLIR (Multi-Level Intermediate Representation)
-examples that can be helpful for writing a programming language.
+This repository contains MLIR  examples that can be helpful for writing a 
+programming language.
 
-Note that it's recommended to use the C++ API, or the C bindings. Writing the MLIR 
-without using the provided APIs can be daunting. So, these examples are for educational 
+MLIR (Multi-Level Intermediate Representation) is an LLVM project made to 
+address some of the shortcomings of LLVM IR. Many languages using LLVM as 
+a backend (e.g. Swift, Rust) have have resorted to defining their own IRs 
+because dropping all the way down to LLVM IR loses almost all of a language’s semantics.
+
+Note that the recommendation is to use the C++ API, or bindings for a language (C, Python, etc.). 
+Writing the MLIR without using the provided APIs can be daunting. So, these examples are for educational 
 purposes only.
 
 MLIR concepts:
@@ -14,7 +19,6 @@ MLIR concepts:
 * Module
   * Operation
     * Region
-      * Operation 
       * Basic Block
         * Operation
 
@@ -71,6 +75,15 @@ The above MLIR can be read this way:
 
 ### Install
 
+Find the correct path, version and get latest pip:
+
+```shell
+readlink -f $(which python3)
+python3 --version
+python3 pip install --upgrade pip
+```
+Current python3 version: 3.13.5
+
 In order to install the MLIR tools you need the following in your system:
 
 ```
@@ -79,17 +92,22 @@ llvm cmake ninja ccache
 Then build the `mlir-opt` tool:
 
 ```shell
+cd $HOME
 git clone https://github.com/llvm/llvm-project
-mkdir llvm-project/build
-cd llvm-project/build
+cd llvm-project
+python3 -m pip install -r mlir/python/requirements.txt
+mkdir build
+cd build
 cmake -G Ninja ../llvm \
-   -DLLVM_ENABLE_PROJECTS=mlir \
-   -DLLVM_BUILD_EXAMPLES=ON \
-   -DLLVM_TARGETS_TO_BUILD="Native;ARM;X86" \
-   -DCMAKE_BUILD_TYPE=Release \
-   -DLLVM_ENABLE_ASSERTIONS=ON \
-   -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
-   -DLLVM_CCACHE_BUILD=ON
+  -DLLVM_ENABLE_PROJECTS=mlir \
+  -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
+  -DPython3_EXECUTABLE=$(readlink -f $(which python3))
+  -DLLVM_BUILD_EXAMPLES=ON \
+  -DLLVM_TARGETS_TO_BUILD="Native;ARM;X86" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DLLVM_ENABLE_ASSERTIONS=ON \
+  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+  -DLLVM_CCACHE_BUILD=ON
 cmake --build . --target check-mlir
 sudo cmake --build . --target install
 ```
@@ -98,6 +116,13 @@ It's going to take a while!
 Verify:
 ```shell
 mlir-opt --version
+ninja check-mlir-python
+```
+
+You need to add 2 environment variables
+```shell
+export LLVM_PROJECT="$HOME/llvm-project"
+export PYTHONPATH="$LLVM_PROJECT/build/tools/mlir/python_packages/mlir_core"
 ```
 
 ### Disclaimer
