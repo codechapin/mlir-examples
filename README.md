@@ -5,7 +5,7 @@ programming language.
 
 MLIR (Multi-Level Intermediate Representation) is an LLVM project made to 
 address some of the shortcomings of LLVM IR. Many languages using LLVM as 
-a backend (e.g. Swift, Rust) have have resorted to defining their own IRs 
+a backend (e.g. Swift, Rust) have resorted to defining their own IRs 
 because dropping all the way down to LLVM IR loses almost all of a language’s semantics.
 
 Note that the recommendation is to use the C++ API, or bindings for a language (C, Python, etc.). 
@@ -17,38 +17,39 @@ MLIR concepts:
 * Lowering
 * Dialect
 * Module
-  * Operation
-    * Region
-      * Basic Block
-        * Operation
+* Operation
+* Region
+* Block
 
 ### Lowering
-Passes to lower the code from high level to low level, 
-each pass has the opportunity to improve performance and semantics 
+A pipeline of passes (steps) to lower the code from high level code to low level code.
+For example: C is the high level code and binary machine code is the low level code. 
+Each pass in the pipeline has the opportunity to improve performance and/or semantics 
 of the lowered code.
 
 ### Dialect
-A collection of rules, operations, and types for a domain. 
+A collection of rules, operations, and types for a specific domain (Math, Memory, Concurrency, etc.).
+
 Some default dialects:
 * scf: structured control flow, loops and conditionals
 * index: accessing elements in arrays and tensors
 * func: defining and calling functions
 * memref: memory allocation and management. Buffers
-* arith: arithmetic, bitwise, and comparison operations for integers and floats. Including vectors, scalars, tensors
+* arith: arithmetic, bitwise, and comparison operations for integers/floats. Including vectors, scalars, tensors
 * tensor: multi-dimensional arrays (tensors)
 * linalg: linear algebra
 
 ### Module
-The top level set of Operations
+The top level set of Operations.
 
 ### Operation
-A collection of Regions. Named: `my_dialect.my_operation`
+A collection of Regions.
 
 ### Region
-A collection of Basic Blocks and/or Operations, uses `{}`
+A collection of Blocks. Syntax: `{}`
 
-### Basic Block
-A collection of Operations, uses `^` and a label. Like: `^bb1`
+### Block
+A collection of Operations. Syntax: `^` and a label. Like: `^bb1`.
 
 ```
 module {
@@ -63,19 +64,24 @@ module {
 
 The above MLIR can be read this way:
 * definition of a Module
-* the Operation `func.func` defines a Function named `@select`
-* `@select` Function takes 3 arguments: `a` and `b` are of type `i32`, `flag` of type `i1`. Normally a `boolean` is an alias to `i1` 
-* `@select` Function returns an `i32` type
-* inside the Region we have an Operation and a Basic Block
-* the Operation `cf.cond_br` is a condition that checks if `flag` is `1` or `0`
-* if `flag` is `1`. it calls the Basic Block `^bb1` with the value of `a`
-* if `flag` is `0`. it calls the Basic Block `^bb1` with the value of `b`
-* Basic Block `^bb1` takes 1 argument of type `i32`
-* Basic Block `^bb1` returns from the Function with the value received in the argument `x`
+* the Operation `func.func` defines a function with the symbol name `select`
+  * `select` function takes 3 arguments: `a`, `b` and `flag`
+  * `a` and `b` have `i32` type, `flag` has `i1` type 
+  * `select` function returns an `i32` type
+* inside the function we have one Region
+* inside the Region we have an entry Block
+  * an entry Block is a Block with no label and no arguments that may occur at the beginning of a Region
+* inside the entry Block we have one Operation and one basic Block
+  * the Operation `cf.cond_br` is a condition that checks if `flag` is `1` or `0`
+    * if `flag` is `1`. it calls the basic Block `^bb1` with the value of `a`
+    * if `flag` is `0`. it calls the basic Block `^bb1` with the value of `b`
+  * basic Block `^bb1` takes 1 argument of type `i32`
+    * basic Block `^bb1` returns from the Function with the value received in the argument `x`
 
 ### Install
 
-Find the correct path, version and get latest pip:
+The examples use the Python bindings. Most of this document should work for Mac and Linux. 
+Find Python's correct path, version and get latest pip:
 
 ```shell
 readlink -f $(which python3)
@@ -84,12 +90,21 @@ python3 pip install --upgrade pip
 ```
 Current python3 version: 3.13.5
 
+Because we are using the Python bindings, we need to tell CMake to build the bindings. Double check that 
+the following variables are passed to the cmake command:
+
+```shell
+MLIR_ENABLE_BINDINGS_PYTHON=ON
+Python3_EXECUTABLE=$(readlink -f $(which python3))
+```
+
 In order to install the MLIR tools you need the following in your system:
 
 ```
 llvm cmake ninja ccache
-```
-Then build the `mlir-opt` tool:
+``` 
+
+Now we can build the tools:
 
 ```shell
 cd $HOME

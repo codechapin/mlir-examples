@@ -1,12 +1,11 @@
-The following 2 files should produce the same assembly 
-with Clang:
+The following 2 files should produce the same assembly with Clang:
 
 * `001-simple-return-0.c`
 * `001-simple-return-0.mlir`
 
 The python file will create similar MLIR as the above mlir file, but using the Python bindings.
 
-A simplified MLIR workflow:
+A simplified MLIR lowering pipeline:
 
 ## First pass
 Lower the MLIR to LLVM Dialect:
@@ -35,7 +34,7 @@ Lower the MLIR to LLVM IR
 ```shell
 mlir-translate -mlir-to-llvmir 001-simple-return-1.mlir -o 001-simple-return-2.ll
 ```
-The lowered is now in `001-simple-return-2.ll` as LLVM IR.
+The lowered code is now in `001-simple-return-2.ll` as a LLVM IR.
 
 ## Third pass
 Lower the LLVM IR to Object file
@@ -44,7 +43,7 @@ Lower the LLVM IR to Object file
 llc -filetype=obj 001-simple-return-2.ll -o 001-simple-return.o
 ```
 ## Fourth pass
-Lower Object file to executable
+Lower the Object file to executable
 
 ```shell
 clang 001-simple-return.o -o 001-simple-return.exe
