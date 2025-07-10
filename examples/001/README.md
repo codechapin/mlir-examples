@@ -14,7 +14,6 @@ Lower the MLIR to LLVM Dialect:
  mlir-opt --convert-func-to-llvm \
   --convert-arith-to-llvm \
   --reconcile-unrealized-casts \
-  --triple=arm64-apple-macosx15.0.0 \
   001-simple-return-0.mlir \
   -o 001-simple-return-1.mlir
 ```
